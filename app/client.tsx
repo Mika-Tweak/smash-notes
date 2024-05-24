@@ -22,7 +22,7 @@ export default function CharacterList({ characters }: {
   )
 
   return (
-    <div className="container mx-auto py-8 px-4 md:px-6">
+    <div className="container mx-auto py- 8 px-4 md:px-6">
       <div className="flex flex-col items-center mb-6">
         <h1 className="text-3xl font-bold">Smash Bros Character Matchups</h1>
         <div className="mt-4 w-full max-w-md">
