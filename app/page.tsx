@@ -3,6 +3,7 @@ import type { Character } from "./types"
 import { fighters } from './fighter.json'
 export const dynamic = 'force-static'
 
+
 const charactersPercents = [
   { name: "banjo_and_kazooie", comboMoveType: "no-dash", percentWindow: [100, 121] },
   { name: "bayonetta", comboMoveType: "", percentWindow: false },
@@ -109,7 +110,7 @@ export default async function Page() {
   characters = addMiis(characters) as any
 
   return (
-    <div>
+    <div style={{ marginTop: '4rem' }}>
       <CharacterList characters={characters} />
     </div>
   )

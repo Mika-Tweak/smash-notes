@@ -1,15 +1,12 @@
 "use client"
-/**
- * v0 by Vercel.
- * @see https://v0.dev/t/Ng07T4LvFQy
- * Documentation: https://v0.dev/docs#integrating-generated-code-into-your-nextjs-app
- */
+
 import { Input } from "@/components/ui/input"
 import { useState } from "react"
 import Image from "next/image"
 import { Dialog, DialogContent } from "@/components/ui/dialog"
 import { Character } from "./types"
 import { Card, CardContent, CardHeader } from "@/components/ui/card"
+import { LoginDialog } from "@/components/login" 
 
 export default function CharacterList({ characters }: {
   characters: Character[]
@@ -23,6 +20,7 @@ export default function CharacterList({ characters }: {
 
   return (
     <div className="container mx-auto py- 8 px-4 md:px-6">
+      <LoginDialog/>
       <div className="flex flex-col items-center mb-6">
         <h1 className="text-3xl font-bold">Smash Bros Character Matchups</h1>
         <div className="mt-4 w-full max-w-md">
