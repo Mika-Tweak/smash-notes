@@ -27,7 +27,7 @@ export function LoginDialog() {
   return (
     <div>
       {user ? (
-        <div className="fixed top-4 right-4 z-50">
+        <div>
           <DropdownMenu.Root>
             <DropdownMenu.Trigger asChild>
               <Button variant="outline">{user.email}</Button>
@@ -42,7 +42,7 @@ export function LoginDialog() {
       ) : (
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" className="fixed top-4 right-4 z-50">
+            <Button variant="outline" className="top-4 right-4 z-50">
               Login/Signup
             </Button>
           </DialogTrigger>
