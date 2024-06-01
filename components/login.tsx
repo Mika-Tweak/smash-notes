@@ -6,22 +6,31 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { login, signup, logout } from "@/app/login/actions";
 import { useAuth } from '@/utils/AuthContext';
-import supabase from '@/utils/supabase';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import { useRouter } from 'next/navigation';
 
 export function LoginDialog() {
   const { user, setUser } = useAuth();
   const [loginError, setLoginError] = useState<string | null>(null);
   const [signupError, setSignupError] = useState<string | null>(null);
   const [passwordMismatchError, setPasswordMismatchError] = useState<string | null>(null);
-
+  const router = useRouter();
+  
   const handleLogout = async () => {
     const result = await logout();
     if (result.success) {
       setUser(null);
+      resetState();
+      router.refresh();
     } else {
       console.error(result.error);
     }
+  };
+
+  const resetState = () => {
+    setLoginError(null);
+    setSignupError(null);
+    setPasswordMismatchError(null);
   };
 
   return (
@@ -60,6 +69,8 @@ export function LoginDialog() {
                     const result = await login(formData, setUser);
                     if (!result.success) {
                       setLoginError(result.error || 'An unknown error occurred');
+                    } else {
+                      router.refresh();
                     }
                   }}
                   className="space-y-4 py-6"
