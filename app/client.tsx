@@ -64,9 +64,9 @@ export default function CharacterList({ characters }: { characters: Character[] 
       .map((card) => (
         <Card
           key={card.id}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-md cursor-pointer hover:shadow-lg hover:border hover:border-primary transition-all"
+          className="bg-card rounded-lg shadow-md cursor-pointer hover:shadow-lg hover:border hover:border-primary transition-all"
           onClick={async() => {
-            await setSelectedCharacter(card);
+            setSelectedCharacter(card);
             await loadCardIntoEditorHandler(card.id);
           }}
         >
@@ -156,18 +156,19 @@ export default function CharacterList({ characters }: { characters: Character[] 
       )}
       {selectedCharacter && (
         <Dialog
-          open={!!selectedCharacter}
-          onOpenChange={(open) => {
-            if (!open) {
-              setSelectedCharacter(null);
-              setIsEditing(false);
-            }
-          }}
-          // TODO: make scrolling when card is open not require this
-          modal={false}
-        >
+        open={!!selectedCharacter}
+        onOpenChange={(open) => {
+          if (open) {
+            document.body.style.overflow = 'hidden';
+          } else {
+            document.body.style.overflow = 'auto';
+            setSelectedCharacter(null);
+            setIsEditing(false);
+          }
+        }}
+      >
           <DialogContent className="sm:max-w-[1200px] min-h-[500px] max-h-full overflow-y-scroll m-6 bg-card flex flex-col">
-            <div className="flex items-center justify-between p-0 m-0 pt-6">
+            <div className="flex items-center justify-between p-1 m-0 pt-3">
               <h2 className="text-2xl font-bold">{selectedCharacter.title}</h2>
               {user && (
                 <Button variant="secondary" onClick={() => setIsEditing(!isEditing)} className="hover:border hover:border-primary">
