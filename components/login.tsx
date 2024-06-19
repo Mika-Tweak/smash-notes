@@ -6,7 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { login, signup, logout } from "@/app/login/actions";
 import { useAuth } from '@/utils/AuthContext';
-import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import * as DropdownMenu from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
 
 export function LoginDialog() {
@@ -36,22 +36,22 @@ export function LoginDialog() {
   return (
     <div>
       {user ? (
-        <div>
-          <DropdownMenu.Root>
-            <DropdownMenu.Trigger asChild>
-              <Button variant="outline">{user.email}</Button>
-            </DropdownMenu.Trigger>
-            <DropdownMenu.Content className="bg-white shadow-lg rounded-md p-2">
-              <DropdownMenu.Item onSelect={handleLogout} className="cursor-pointer hover:bg-gray-200 p-2 rounded-md">
+          <DropdownMenu.DropdownMenu modal={false}>
+            <DropdownMenu.DropdownMenuTrigger asChild>
+              <Button variant="outline" className="text-white bg-card hover:border-primary">{user.email}</Button>
+            </DropdownMenu.DropdownMenuTrigger>
+            <DropdownMenu.DropdownMenuContent className="text-white bg-card hover:border-primary">
+            <DropdownMenu.DropdownMenuItem>Settings</DropdownMenu.DropdownMenuItem>
+            <DropdownMenu.DropdownMenuSeparator />
+              <DropdownMenu.DropdownMenuItem onSelect={handleLogout}> 
                 Sign Out
-              </DropdownMenu.Item>
-            </DropdownMenu.Content>
-          </DropdownMenu.Root>
-        </div>
+              </DropdownMenu.DropdownMenuItem>
+            </DropdownMenu.DropdownMenuContent>
+          </DropdownMenu.DropdownMenu>
       ) : (
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" className="top-4 right-4 z-50">
+            <Button variant="outline" className="text-white bg-card hover:border-primary">
               Login/Signup
             </Button>
           </DialogTrigger>

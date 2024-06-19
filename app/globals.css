@@ -30,7 +30,7 @@
   .dark {
     --background: 20 14.3% 4.1%;
     --foreground: 0 0% 95%;
-    --card: 24 9.8% 10%;
+    --card: 215 27.9% 16.9%;
     --card-foreground: 0 0% 95%;
     --popover: 0 0% 9%;
     --popover-foreground: 0 0% 95%;
@@ -68,8 +68,26 @@
 @layer base {
   * {
     @apply border-border;
+    
   }
-
+  ul
+  {
+    list-style: disc;
+    margin: 0;
+    padding: 0;
+  }
+  ol
+  {
+    list-style: decimal;
+    margin: 0;
+    padding: 0;
+  }
+  menu
+  {
+    list-style: decimal;
+    margin: 0;
+    padding: 0;
+  }
   body {
     @apply bg-zinc-900 text-foreground;
   }

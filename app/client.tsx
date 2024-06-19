@@ -8,12 +8,13 @@ import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { LoginDialog } from "@/components/login";
 import { useAuth } from "@/utils/AuthContext";
-import supabase from "@/utils/supabase";
 import { Character } from "./types";
-import dynamic from "next/dynamic";
-
 import MarkdownEditor from '@uiw/react-md-editor';
+import rehypeSanitize from "rehype-sanitize";
 
+// Import actions
+import { fetchCards, prepopulateCards, loadCardIntoEditor, saveCardEdits } from "./actions";
+import { Edit2Icon, EditIcon } from "lucide-react";
 
 export default function CharacterList({ characters }: { characters: Character[] }) {
   const { user } = useAuth();
@@ -24,6 +25,7 @@ export default function CharacterList({ characters }: { characters: Character[] 
   const [isWindowLoaded, setIsWindowLoaded] = useState(false);
   const [userCards, setUserCards] = useState<any[]>([]);
   const [hasInitializedCards, setHasInitializedCards] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     setIsWindowLoaded(true);
@@ -39,11 +41,11 @@ export default function CharacterList({ characters }: { characters: Character[] 
 
   async function fetchAndInitializeCards() {
     try {
-      const cards = await fetchCards();
+      const cards = await fetchCards(user.id);
       if (cards.length === 0) {
         console.log("No cards found for user, prepopulating cards...");
         await prepopulateCards(user.id, characters);
-        const newCards = await fetchCards(); // Fetch the cards again after prepopulating
+        const newCards = await fetchCards(user.id); // Fetch the cards again after prepopulating
         setUserCards(newCards);
       } else {
         setUserCards(cards);
@@ -51,51 +53,6 @@ export default function CharacterList({ characters }: { characters: Character[] 
       setHasInitializedCards(true);
     } catch (error) {
       console.error("Error initializing cards:", error);
-    }
-  }
-
-  async function fetchCards(): Promise<any[]> {
-    try {
-      if (!user) {
-        return [];
-      }
-
-      const { data, error } = await supabase
-        .from("cards")
-        .select("*")
-        .eq("user_id", user.id)
-        .order("id", { ascending: true });
-
-      if (error) {
-        console.error("Error fetching cards:", error);
-        return [];
-      } else {
-        console.log("Fetched cards:", data);
-        return data;
-      }
-    } catch (error) {
-      console.error("Error fetching cards:", error);
-      return [];
-    }
-  }
-
-  async function prepopulateCards(userId: string, characters: Character[]) {
-    try {
-      const defaultCards = characters.map((character) => ({
-        user_id: userId,
-        title: character.displayName.en_US,
-        content: "", // Default content as an empty string
-      }));
-
-      const { error } = await supabase.from("cards").insert(defaultCards);
-
-      if (error) {
-        console.error("Error prepopulating cards:", error);
-      } else {
-        console.log("Cards prepopulated for new user");
-      }
-    } catch (error) {
-      console.error("Error prepopulating cards:", error);
     }
   }
 
@@ -107,10 +64,10 @@ export default function CharacterList({ characters }: { characters: Character[] 
       .map((card) => (
         <Card
           key={card.id}
-          className="bg-white dark:bg-gray-800 rounded-lg shadow-md cursor-pointer hover:shadow-lg transition-shadow"
-          onClick={() => {
-            setSelectedCharacter(card);
-            loadCardIntoEditor(card.id);
+          className="bg-white dark:bg-gray-800 rounded-lg shadow-md cursor-pointer hover:shadow-lg hover:border hover:border-primary transition-all"
+          onClick={async() => {
+            await setSelectedCharacter(card);
+            await loadCardIntoEditorHandler(card.id);
           }}
         >
           <CardHeader className="p-0">
@@ -131,56 +88,36 @@ export default function CharacterList({ characters }: { characters: Character[] 
       ));
   }
 
-  async function loadCardIntoEditor(cardId: any) {
-    if (!user) {
-      return;
-    }
+  async function loadCardIntoEditorHandler(cardId: any) {
+    if (!user) return;
 
-    const { data, error } = await supabase
-      .from("cards")
-      .select("*")
-      .eq("id", cardId)
-      .eq("user_id", user.id)
-      .single();
-
-    if (error) {
-      console.error("Error fetching card:", error);
-    } else {
-      setMarkdownContent(data.content); // Load content in Markdown format
-      setSelectedCharacter(data);
+    const cardData = await loadCardIntoEditor(cardId, user.id);
+    if (cardData) {
+      setMarkdownContent(cardData.content); // Load content in Markdown format
+      setSelectedCharacter(cardData);
     }
   }
 
-  const [loading, setLoading] = useState(false)
-  async function saveCardEdits(cardId: any) {
+  async function saveCardEditsHandler(cardId: any) {
     if (!user) {
       console.error("User is not logged in");
       return;
     }
 
-    setLoading(true)
+    setLoading(true);
 
     try {
-      const { error } = await supabase
-        .from("cards")
-        .update({ content: markdownContent, updated_at: new Date() })
-        .eq("id", cardId)
-        .eq("user_id", user.id);
-
-      if (error) {
-        console.error("Error updating card:", error);
-      } else {
-        const updatedCards = userCards.map((card) =>
-          card.id === cardId ? { ...card, content: markdownContent } : card
-        );
-        setUserCards(updatedCards);
-        setSelectedCharacter({ ...selectedCharacter, content: markdownContent }); // Update the selectedCharacter state
-        setIsEditing(false); // Exit editing mode
-      }
+      await saveCardEdits(cardId, user.id, markdownContent);
+      const updatedCards = userCards.map((card) =>
+        card.id === cardId ? { ...card, content: markdownContent } : card
+      );
+      setUserCards(updatedCards);
+      setSelectedCharacter({ ...selectedCharacter, content: markdownContent }); // Update the selectedCharacter state
+      setIsEditing(false); // Exit editing mode
     } catch (error) {
       console.error("Error updating card:", error);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
   }
 
@@ -226,13 +163,16 @@ export default function CharacterList({ characters }: { characters: Character[] 
               setIsEditing(false);
             }
           }}
+          // TODO: make scrolling when card is open not require this
+          modal={false}
         >
-          <DialogContent className="sm:max-w-[1200px] sm:min-h-[600px] bg-card flex flex-col">
+          <DialogContent className="sm:max-w-[1200px] min-h-[500px] max-h-full overflow-y-scroll m-6 bg-card flex flex-col">
             <div className="flex items-center justify-between p-0 m-0 pt-6">
               <h2 className="text-2xl font-bold">{selectedCharacter.title}</h2>
               {user && (
-                <Button variant="default" onClick={() => setIsEditing(!isEditing)}>
-                  {isEditing ? "Cancel" : "Edit"}
+                <Button variant="secondary" onClick={() => setIsEditing(!isEditing)} className="hover:border hover:border-primary">
+                  {isEditing ? "Cancel" : <EditIcon/>}
+                  
                 </Button>
               )}
             </div>
@@ -242,11 +182,14 @@ export default function CharacterList({ characters }: { characters: Character[] 
                   <MarkdownEditor
                     value={markdownContent}
                     onChange={(value) => setMarkdownContent(value || "")}
-                    height="200px"
+                    height="400px"
                     style={{ marginBottom: "16px" }} // Add margin to separate the editor and the button
                     preview="live"
+                    previewOptions={{
+                      rehypePlugins: [[rehypeSanitize]],
+                    }}
                   />
-                  <Button onClick={() => saveCardEdits(selectedCharacter.id)} style={{ marginTop: "16px" }}>
+                  <Button onClick={() => saveCardEditsHandler(selectedCharacter.id)} style={{ marginTop: "16px" }}>
                     {loading ? "Loading..." : "Save"}
                   </Button>
                 </>
@@ -255,6 +198,8 @@ export default function CharacterList({ characters }: { characters: Character[] 
                 <MarkdownEditor.Markdown
                   source={selectedCharacter?.content || ""}
                   style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'stretch' }}
+                  className="p-5"
+                  
                 />
               )}
             </div>
