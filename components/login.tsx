@@ -11,6 +11,7 @@ import { useRouter } from 'next/navigation';
 import { DropdownMenuCheckboxItemProps } from '@radix-ui/react-dropdown-menu';
 import { DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu';
 import { useTheme } from 'next-themes';
+import useSWR from 'swr'
 
 type Checked = DropdownMenuCheckboxItemProps["checked"]
 
@@ -21,6 +22,12 @@ export function LoginDialog() {
   const [passwordMismatchError, setPasswordMismatchError] = useState<string | null>(null);
   const router = useRouter();
   const { setTheme,theme } = useTheme()
+  const { data: showPercents, mutate: setShowPercents } = useSWR<boolean>(
+    'state:percents',
+    {
+      fallbackData: false,
+    },
+  )
 
 
 
@@ -49,6 +56,14 @@ export function LoginDialog() {
             <Button variant="outline" className="text-foreground bg-card hover:border-primary">{user.email}</Button>
           </DropdownMenu.DropdownMenuTrigger>
           <DropdownMenu.DropdownMenuContent className="p-0 gap-0">
+          <DropdownMenuCheckboxItem 
+                className="flex justify-center items-center text-foreground text-center bg-card hover:border hover:border-primary rounded-b-none"
+                checked={showPercents===true}
+                // @ts-ignore
+                onCheckedChange={()=> setShowPercents(!showPercents)}
+              >
+                Brawler %s
+              </DropdownMenuCheckboxItem>
               <DropdownMenuCheckboxItem 
                 className="flex justify-center items-center text-foreground text-center bg-card hover:border hover:border-primary rounded-b-none"
                 checked={theme==="dark"}

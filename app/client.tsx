@@ -11,11 +11,16 @@ import { useAuth } from "@/utils/AuthContext";
 import { Character } from "./types";
 import MarkdownEditor from '@uiw/react-md-editor';
 import rehypeSanitize from "rehype-sanitize";
+import useSWR from 'swr'
+
+
+
 
 // Import actions
 import { fetchCards, prepopulateCards, loadCardIntoEditor, saveCardEdits } from "./actions";
 import { Edit2Icon, EditIcon } from "lucide-react";
 import { useTheme } from "next-themes";
+import { charactersPercents } from "./const";
 
 export default function CharacterList({ characters }: { characters: Character[] }) {
   const { user } = useAuth();
@@ -28,7 +33,12 @@ export default function CharacterList({ characters }: { characters: Character[] 
   const [hasInitializedCards, setHasInitializedCards] = useState(false);
   const [loading, setLoading] = useState(false);
   const { theme } = useTheme();
-
+  const { data: showPercents, mutate: setShowPercents } = useSWR<boolean>(
+    'state:percents',
+    {
+      fallbackData: false,
+    },
+  )
   useEffect(() => {
     setIsWindowLoaded(true);
   }, []);
@@ -40,6 +50,21 @@ export default function CharacterList({ characters }: { characters: Character[] 
       resetState();
     }
   }, [user]);
+
+  function formatPercentWindow(percentWindow: Character['percentWindow']) {
+    if (Array.isArray(percentWindow)) {
+      const firstValue = percentWindow[0]
+      const secondValue = percentWindow[1]
+
+      if (firstValue === secondValue) {
+        return `${firstValue}%`
+      }
+
+      return `${firstValue}% - ${secondValue ? `${secondValue}%` : "var"}`
+    }
+
+    return percentWindow
+  }
 
   async function fetchAndInitializeCards() {
     try {
@@ -59,7 +84,13 @@ export default function CharacterList({ characters }: { characters: Character[] 
   }
 
   function renderCards() {
-    return userCards
+    const userCardsWithPercents = userCards.map((card) => ({
+      ...card,
+      percentWindow: charactersPercents.find((c) => c.tracker === card.order_index)?.percentWindow,
+      comboMoveType: charactersPercents.find((c) => c.tracker === card.order_index)?.comboMoveType,
+    }));
+  
+    return userCardsWithPercents
       .filter((card) =>
         card.title.toLowerCase().normalize("NFKD").includes(searchTerm.toLowerCase())
       )
@@ -82,8 +113,17 @@ export default function CharacterList({ characters }: { characters: Character[] 
               height={300}
               className="rounded-t-lg w-full h-full object-cover"
             />
-            <div className="p-4">
-              <h3 className="text-lg font-bold mb-2">{card.title}</h3>
+            <div className="flex flex-col items-center justify-center font-bold" style={{ minHeight: '80px' }}>
+              <h3 className="text-xl mb-2 text-foreground">{card.title}</h3>
+              {showPercents && (
+                <p className={`flex justify-evenly ${card.comboMoveType === "no-dash" ? "text-green-500" : card.comboMoveType === "dash-first" ? "text-red-500" : "text-gray-500"}`}>
+                  {card.percentWindow ? (
+                    formatPercentWindow(card.percentWindow)
+                  ) : (
+                    <span className="text-foreground">N/A</span>
+                  )}
+                </p>
+              )}
             </div>
           </CardHeader>
         </Card>
@@ -179,24 +219,24 @@ export default function CharacterList({ characters }: { characters: Character[] 
                 </Button>
               )}
             </div>
-            <div className="w-full h-full flex-grow flex flex-col" data-color-mode={theme === "dark"? "dark" : "light"}>
+            <div className="w-full h-full flex-grow flex flex-col" data-color-mode={theme === "dark" ? "dark" : "light"}>
               {isEditing && isWindowLoaded ? (
                 <>
-                
+
                   <div className="wmde-markdown-var text-foreground"> </div>
                   <MarkdownEditor
                     value={markdownContent}
                     onChange={(value) => setMarkdownContent(value || "")}
                     height="400px"
-                    style={{ 
+                    style={{
                       marginBottom: "16px",
-                     }} // Add margin to separate the editor and the button
+                    }} // Add margin to separate the editor and the button
                     preview="live"
                     previewOptions={{
                       rehypePlugins: [[rehypeSanitize]],
                     }}
                   />
-                  <Button onClick={() => saveCardEditsHandler(selectedCharacter.id)} style={{ marginTop: "16px"}}>
+                  <Button onClick={() => saveCardEditsHandler(selectedCharacter.id)} style={{ marginTop: "16px" }}>
                     {loading ? "Loading..." : "Save"}
                   </Button>
                 </>
@@ -207,9 +247,9 @@ export default function CharacterList({ characters }: { characters: Character[] 
 
                   <MarkdownEditor.Markdown
                     source={selectedCharacter?.content || ""}
-                    style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'stretch',}}
+                    style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'stretch', }}
                     className="p-5"
-                    
+
 
                   />
                 </>
