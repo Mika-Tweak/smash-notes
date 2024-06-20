@@ -15,6 +15,7 @@ import rehypeSanitize from "rehype-sanitize";
 // Import actions
 import { fetchCards, prepopulateCards, loadCardIntoEditor, saveCardEdits } from "./actions";
 import { Edit2Icon, EditIcon } from "lucide-react";
+import { useTheme } from "next-themes";
 
 export default function CharacterList({ characters }: { characters: Character[] }) {
   const { user } = useAuth();
@@ -26,6 +27,7 @@ export default function CharacterList({ characters }: { characters: Character[] 
   const [userCards, setUserCards] = useState<any[]>([]);
   const [hasInitializedCards, setHasInitializedCards] = useState(false);
   const [loading, setLoading] = useState(false);
+  const { theme } = useTheme();
 
   useEffect(() => {
     setIsWindowLoaded(true);
@@ -65,7 +67,7 @@ export default function CharacterList({ characters }: { characters: Character[] 
         <Card
           key={card.id}
           className="bg-card rounded-lg shadow-md cursor-pointer hover:shadow-lg hover:border hover:border-primary transition-all"
-          onClick={async() => {
+          onClick={async () => {
             setSelectedCharacter(card);
             await loadCardIntoEditorHandler(card.id);
           }}
@@ -131,14 +133,14 @@ export default function CharacterList({ characters }: { characters: Character[] 
 
   return (
     <div className="container mx-auto py-8 px-4 md:px-6">
-      <div className="absolute top-4 right-4 z-50">
+      <div className="absolute top-5 right-10 z-50">
         <LoginDialog />
       </div>
       <div className="flex flex-col items-center mb-6">
         <h1 className="text-3xl font-bold">Smash Bros Character Matchups</h1>
         <div className="mt-4 w-full max-w-md">
           <Input
-            placeholder="Search cards..."
+            placeholder="Search Characters..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="w-full"
@@ -156,53 +158,63 @@ export default function CharacterList({ characters }: { characters: Character[] 
       )}
       {selectedCharacter && (
         <Dialog
-        open={!!selectedCharacter}
-        onOpenChange={(open) => {
-          if (open) {
-            document.body.style.overflow = 'hidden';
-          } else {
-            document.body.style.overflow = 'auto';
-            setSelectedCharacter(null);
-            setIsEditing(false);
-          }
-        }}
-      >
+          open={!!selectedCharacter}
+          onOpenChange={(open) => {
+            if (open) {
+              document.body.style.overflow = 'hidden';
+            } else {
+              document.body.style.overflow = 'auto';
+              setSelectedCharacter(null);
+              setIsEditing(false);
+            }
+          }}
+        >
           <DialogContent className="sm:max-w-[1200px] min-h-[500px] max-h-full overflow-y-scroll m-6 bg-card flex flex-col">
             <div className="flex items-center justify-between p-1 m-0 pt-3">
               <h2 className="text-2xl font-bold">{selectedCharacter.title}</h2>
               {user && (
-                <Button variant="secondary" onClick={() => setIsEditing(!isEditing)} className="hover:border hover:border-primary">
-                  {isEditing ? "Cancel" : <EditIcon/>}
-                  
+                <Button variant="secondary" onClick={() => setIsEditing(!isEditing)} className="hover:border hover:border-primary bg-background">
+                  {isEditing ? "Cancel" : <EditIcon />}
+
                 </Button>
               )}
             </div>
-            <div className="w-full h-full flex-grow flex flex-col">
+            <div className="w-full h-full flex-grow flex flex-col" data-color-mode={theme === "dark"? "dark" : "light"}>
               {isEditing && isWindowLoaded ? (
                 <>
+                
+                  <div className="wmde-markdown-var text-foreground"> </div>
                   <MarkdownEditor
                     value={markdownContent}
                     onChange={(value) => setMarkdownContent(value || "")}
                     height="400px"
-                    style={{ marginBottom: "16px" }} // Add margin to separate the editor and the button
+                    style={{ 
+                      marginBottom: "16px",
+                     }} // Add margin to separate the editor and the button
                     preview="live"
                     previewOptions={{
                       rehypePlugins: [[rehypeSanitize]],
                     }}
                   />
-                  <Button onClick={() => saveCardEditsHandler(selectedCharacter.id)} style={{ marginTop: "16px" }}>
+                  <Button onClick={() => saveCardEditsHandler(selectedCharacter.id)} style={{ marginTop: "16px"}}>
                     {loading ? "Loading..." : "Save"}
                   </Button>
                 </>
               ) : (
                 // Render the content using Markdown preview mode
-                <MarkdownEditor.Markdown
-                  source={selectedCharacter?.content || ""}
-                  style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'stretch' }}
-                  className="p-5"
-                  
-                />
+                <>
+                  <div className="wmde-markdown-var"> </div>
+
+                  <MarkdownEditor.Markdown
+                    source={selectedCharacter?.content || ""}
+                    style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'stretch',}}
+                    className="p-5"
+                    
+
+                  />
+                </>
               )}
+
             </div>
           </DialogContent>
         </Dialog>

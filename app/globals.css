@@ -2,12 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
+.wmde-markdown {
+  background-color: transparent !important;
+}
+
+.wmde-markdown:not(.markdown-preview) {
+  background-color: hsl(var(--background)) !important;
+}
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
+    --background: 192 15% 97%;
     --foreground: 240 10% 3.9%;
-    --card: 0 0% 100%;
+    --card: 34 95% 95%;
     --card-foreground: 240 10% 3.9%;
     --popover: 0 0% 100%;
     --popover-foreground: 240 10% 3.9%;
@@ -25,6 +32,20 @@
     --input: 240 5.9% 90%;
     --ring: 142.1 76.2% 36.3%;
     --radius: 0.5rem;
+    --color-fg-default: hsl(var(--foreground));
+    --color-fg-muted: hsl(var(--muted-foreground));
+    --color-fg-subtle: hsl(var(--secondary-foreground));
+    --color-canvas-default: hsl(var(--background));
+    --color-canvas-subtle: hsl(var(--card));
+    --color-border-default: hsl(var(--border));
+    --color-border-muted: hsl(var(--muted));
+    --color-neutral-muted: rgba(175, 184, 193, 0.2);
+    /* Custom value retained */
+    --color-accent-fg: hsl(var(--accent));
+    --color-accent-emphasis: hsl(var(--accent));
+    --color-attention-subtle: #fff8c5;
+    /* Custom value retained */
+    --color-danger-fg: hsl(var(--destructive));
   }
 
   .dark {
@@ -61,6 +82,8 @@
     --color-attention-subtle: #fff8c5;
     /* Custom value retained */
     --color-danger-fg: hsl(var(--destructive));
+
+    
   }
 }
 
@@ -90,20 +113,20 @@
   }
 
   body {
-    @apply bg-zinc-900 text-foreground;
+    @apply bg-background text-foreground;
   }
 
 
   .wmde-markdown-var {
-    color-scheme: light !important;
+    /* color-scheme: light !important; */
     --color-fg-default: hsl(var(--foreground));
     --color-fg-muted: hsl(var(--muted-foreground));
     --color-fg-subtle: hsl(var(--secondary-foreground));
-    --color-canvas-default: hsl(var(--background));
+    --color-canvas-default: hsl(var(--background)) !important;
     --color-canvas-subtle: hsl(var(--card));
     --color-border-default: hsl(var(--border));
     --color-border-muted: hsl(var(--muted));
-    --color-neutral-muted: rgba(175, 184, 193, 0.2);
+    /* --color-neutral-muted: rgba(175, 184, 193, 0.2); */
     /* Custom value retained */
     --color-accent-fg: hsl(var(--accent));
     --color-accent-emphasis: hsl(var(--accent));

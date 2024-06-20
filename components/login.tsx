@@ -8,6 +8,11 @@ import { login, signup, logout } from "@/app/login/actions";
 import { useAuth } from '@/utils/AuthContext';
 import * as DropdownMenu from '@/components/ui/dropdown-menu';
 import { useRouter } from 'next/navigation';
+import { DropdownMenuCheckboxItemProps } from '@radix-ui/react-dropdown-menu';
+import { DropdownMenuCheckboxItem } from '@/components/ui/dropdown-menu';
+import { useTheme } from 'next-themes';
+
+type Checked = DropdownMenuCheckboxItemProps["checked"]
 
 export function LoginDialog() {
   const { user, setUser } = useAuth();
@@ -15,7 +20,10 @@ export function LoginDialog() {
   const [signupError, setSignupError] = useState<string | null>(null);
   const [passwordMismatchError, setPasswordMismatchError] = useState<string | null>(null);
   const router = useRouter();
-  
+  const { setTheme,theme } = useTheme()
+
+
+
   const handleLogout = async () => {
     const result = await logout();
     if (result.success) {
@@ -36,22 +44,28 @@ export function LoginDialog() {
   return (
     <div>
       {user ? (
-          <DropdownMenu.DropdownMenu modal={false}>
-            <DropdownMenu.DropdownMenuTrigger asChild>
-              <Button variant="outline" className="text-white bg-card hover:border-primary">{user.email}</Button>
-            </DropdownMenu.DropdownMenuTrigger>
-            <DropdownMenu.DropdownMenuContent className="text-white bg-card hover:border-primary">
-            <DropdownMenu.DropdownMenuItem>Settings</DropdownMenu.DropdownMenuItem>
-            <DropdownMenu.DropdownMenuSeparator />
-              <DropdownMenu.DropdownMenuItem onSelect={handleLogout}> 
-                Sign Out
-              </DropdownMenu.DropdownMenuItem>
-            </DropdownMenu.DropdownMenuContent>
-          </DropdownMenu.DropdownMenu>
+        <DropdownMenu.DropdownMenu modal={false}>
+          <DropdownMenu.DropdownMenuTrigger asChild>
+            <Button variant="outline" className="text-foreground bg-card hover:border-primary">{user.email}</Button>
+          </DropdownMenu.DropdownMenuTrigger>
+          <DropdownMenu.DropdownMenuContent className="p-0 gap-0">
+              <DropdownMenuCheckboxItem 
+                className="flex justify-center items-center text-foreground text-center bg-card hover:border hover:border-primary rounded-b-none"
+                checked={theme==="dark"}
+                onCheckedChange={()=> setTheme(theme==="dark" ? "light" : "dark")}
+              >
+                Dark Mode
+              </DropdownMenuCheckboxItem>
+            <DropdownMenu.DropdownMenuSeparator className="m-0" />
+            <DropdownMenu.DropdownMenuItem onSelect={handleLogout} className="flex justify-center items-center text-foreground text-center bg-card hover:border hover:border-primary rounded-t-none">
+              Sign Out
+            </DropdownMenu.DropdownMenuItem>
+          </DropdownMenu.DropdownMenuContent>
+        </DropdownMenu.DropdownMenu>
       ) : (
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" className="text-white bg-card hover:border-primary">
+            <Button variant="outline" className="text-foreground bg-card hover:border-primary">
               Login/Signup
             </Button>
           </DialogTrigger>
