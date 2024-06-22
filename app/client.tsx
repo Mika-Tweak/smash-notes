@@ -1,5 +1,6 @@
 "use client";
 
+//imports for client side
 import { useState, useEffect } from "react";
 import { Input } from "@/components/ui/input";
 import Image from "next/image";
@@ -89,7 +90,7 @@ export default function CharacterList({ characters }: { characters: Character[] 
       percentWindow: charactersPercents.find((c) => c.tracker === card.order_index)?.percentWindow,
       comboMoveType: charactersPercents.find((c) => c.tracker === card.order_index)?.comboMoveType,
     }));
-  
+
     return userCardsWithPercents
       .filter((card) =>
         card.title.toLowerCase().normalize("NFKD").includes(searchTerm.toLowerCase())
@@ -209,7 +210,7 @@ export default function CharacterList({ characters }: { characters: Character[] 
             }
           }}
         >
-          <DialogContent className="sm:max-w-[1200px] min-h-[500px] max-h-full overflow-y-scroll m-6 bg-card flex flex-col">
+          <DialogContent className="sm:max-w-[1200px] min-h-[500px] max-h-full overflow-y-hidden m-6 bg-card flex flex-col">
             <div className="flex items-center justify-between p-1 m-0 pt-3">
               <h2 className="text-2xl font-bold">{selectedCharacter.title}</h2>
               {user && (
@@ -219,11 +220,11 @@ export default function CharacterList({ characters }: { characters: Character[] 
                 </Button>
               )}
             </div>
-            <div className="w-full h-full flex-grow flex flex-col" data-color-mode={theme === "dark" ? "dark" : "light"}>
+            <div className="w-full h-full flex-grow flex flex-col overflow-y-scroll" data-color-mode={theme === "dark" ? "dark" : "light"}>
               {isEditing && isWindowLoaded ? (
                 <>
 
-                  <div className="wmde-markdown-var text-foreground"> </div>
+                  <div className="wmde-markdown-var text-foreground "> </div>
                   <MarkdownEditor
                     value={markdownContent}
                     onChange={(value) => setMarkdownContent(value || "")}
@@ -243,15 +244,14 @@ export default function CharacterList({ characters }: { characters: Character[] 
               ) : (
                 // Render the content using Markdown preview mode
                 <>
-                  <div className="wmde-markdown-var"> </div>
-
-                  <MarkdownEditor.Markdown
-                    source={selectedCharacter?.content || ""}
-                    style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'stretch', }}
-                    className="p-5"
-
-
-                  />
+                  <div className="wmde-markdown-var "> </div>
+                  <div className="fixed overflow-y-scroll h-full left-0 w-full p-0">
+                    <MarkdownEditor.Markdown
+                      source={selectedCharacter?.content || ""}
+                      style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'stretch', }}
+                      className="p-5"
+                    />
+                  </div>
                 </>
               )}
 
