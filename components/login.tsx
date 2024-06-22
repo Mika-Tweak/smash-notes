@@ -53,7 +53,7 @@ export function LoginDialog() {
       {user ? (
         <DropdownMenu.DropdownMenu modal={false}>
           <DropdownMenu.DropdownMenuTrigger asChild>
-            <Button variant="outline" className="text-foreground bg-card hover:border-primary">{user.email}</Button>
+            <Button variant="outline" className="text-background bg-foreground hover:border-primary">{user.email}</Button>
           </DropdownMenu.DropdownMenuTrigger>
           <DropdownMenu.DropdownMenuContent className="p-0 gap-0">
           <DropdownMenuCheckboxItem 
@@ -80,7 +80,7 @@ export function LoginDialog() {
       ) : (
         <Dialog>
           <DialogTrigger asChild>
-            <Button variant="outline" className="text-foreground bg-card hover:border-primary">
+            <Button variant="outline" className="text-background bg-foreground hover:border-primary">
               Login/Signup
             </Button>
           </DialogTrigger>
